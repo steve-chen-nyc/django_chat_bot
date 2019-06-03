@@ -16,7 +16,7 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         await self.send(text_data=json.dumps({
-            'message': "Please provide your name to get started.",
+            'message': 'Please provide your name to get started.',
             'bot': True
         }))
 
@@ -52,7 +52,7 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
         else:
             self.name = json.loads(text_data)['message']
 
-            message = "Thanks " + self.name + ". What can i do for you?"
+            message = F'Thanks {self.name}. What can I do for you?'
 
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -95,15 +95,17 @@ class ChatBotConsumer(AsyncWebsocketConsumer):
 
     # Receive message from room group
     async def bot_message(self, event):
-        message = "Perfect! Let me looks this up.... \n"
+        message = 'Perfect! Let me looks this up....'
         client = Client.objects.get(name=self.name)
         projects = client.project_set.all()
 
         if projects.count() > 0:
-            message = message + "you have " + str(projects.count()) + " projects \n"
+            projectCount = str(projects.count())
+
+            message = message + F'you have {projectCount} projects '
 
             for project in projects:
-                message = message + project.name + "\n"
+                message = message + project.name
 
             # Send message to WebSocket
             await self.send(text_data=json.dumps({
